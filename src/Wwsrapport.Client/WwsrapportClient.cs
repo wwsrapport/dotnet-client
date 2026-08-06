@@ -9,7 +9,7 @@ namespace Wwsrapport;
 public sealed class WwsrapportClient : IDisposable
 {
     public const string DefaultBaseUrl = "https://wwsrapport.nl/v1";
-    private const string ClientHeaderValue = "wwsrapport-dotnet/0.1.0";
+    private const string ClientHeaderValue = "wwsrapport-dotnet/0.2.0";
 
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web)
     {

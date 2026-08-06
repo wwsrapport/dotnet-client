@@ -18,7 +18,7 @@ static async Task RunsCreateReportWithIdempotencyKey()
         AssertEqual("Bearer", request.Headers.Authorization?.Scheme, "auth scheme");
         AssertEqual("test-key", request.Headers.Authorization?.Parameter, "auth token");
         AssertEqual("idem-1", request.Headers.GetValues("Idempotency-Key").Single(), "idempotency key");
-        AssertEqual("wwsrapport-dotnet/0.1.0", request.Headers.GetValues("X-WWSrapport-Client").Single(), "client header");
+        AssertEqual("wwsrapport-dotnet/0.2.0", request.Headers.GetValues("X-WWSrapport-Client").Single(), "client header");
 
         return Json(HttpStatusCode.OK, "{\"data\":{\"id\":\"rpt_123\",\"status\":\"draft\",\"address\":{\"postcode\":\"3905RB\",\"house_number\":\"4\"}}}");
     });
