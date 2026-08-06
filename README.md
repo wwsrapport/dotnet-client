@@ -2,6 +2,8 @@
 
 Official .NET SDK for the WWSrapport API.
 
+`client.Registry.DeriveBagReferenceAsync()`, `client.Registry.SearchByBagAsync()` and `client.Reports.VerificationAsync()` expose the Solana attestation flow. `WebhookEvents.All` contains all 27 supported event types.
+
 ## Official Links
 
 - API overview and Swagger: [wwsrapport.nl/api/docs](https://wwsrapport.nl/api/docs)

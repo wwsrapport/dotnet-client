@@ -40,6 +40,7 @@ public sealed class WwsrapportClient : IDisposable
         Usage = new UsageResource(this);
         Rulesets = new RulesetsResource(this);
         Webhooks = new WebhooksResource(this);
+        Registry = new RegistryResource(this);
     }
 
     public string ApiKey { get; }
@@ -50,6 +51,7 @@ public sealed class WwsrapportClient : IDisposable
     public UsageResource Usage { get; }
     public RulesetsResource Rulesets { get; }
     public WebhooksResource Webhooks { get; }
+    public RegistryResource Registry { get; }
 
     internal async Task<T?> RequestJsonAsync<T>(
         HttpMethod method,
@@ -272,6 +274,33 @@ public sealed class ReportsResource
 
     public Task<ApiEnvelope<ImprovementAdvice>?> ImprovementAdviceAsync(string reportId, CancellationToken cancellationToken = default)
         => _client.RequestJsonAsync<ApiEnvelope<ImprovementAdvice>>(HttpMethod.Get, $"/reports/{Uri.EscapeDataString(reportId)}/improvement-advice", cancellationToken: cancellationToken);
+
+    public Task<JsonObject?> VerificationAsync(string reportId, CancellationToken cancellationToken = default)
+        => _client.RequestJsonAsync<JsonObject>(HttpMethod.Get, $"/reports/{Uri.EscapeDataString(reportId)}/verification", cancellationToken: cancellationToken);
+}
+
+public sealed class RegistryResource
+{
+    private readonly WwsrapportClient _client;
+    internal RegistryResource(WwsrapportClient client) => _client = client;
+
+    public Task<JsonObject?> DeriveBagReferenceAsync(string bagVboId, CancellationToken cancellationToken = default)
+    {
+        Validate(bagVboId);
+        return _client.RequestJsonAsync<JsonObject>(HttpMethod.Post, "/registry/bag-reference", new { bagVboId }, cancellationToken: cancellationToken);
+    }
+
+    public Task<JsonObject?> SearchByBagAsync(string bagVboId, CancellationToken cancellationToken = default)
+    {
+        Validate(bagVboId);
+        return _client.RequestJsonAsync<JsonObject>(HttpMethod.Post, "/registry/search-by-bag", new { bagVboId }, cancellationToken: cancellationToken);
+    }
+
+    private static void Validate(string value)
+    {
+        if (value.Length != 16 || value.Any(character => character < '0' || character > '9'))
+            throw new ArgumentException("BAG verblijfsobject ID must contain exactly sixteen digits.", nameof(value));
+    }
 }
 
 public sealed class DocumentsResource
