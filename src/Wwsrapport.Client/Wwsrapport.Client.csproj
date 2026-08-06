@@ -5,7 +5,7 @@
     <Nullable>enable</Nullable>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageId>Wwsrapport.Client</PackageId>
-    <Version>0.2.0</Version>
+    <Version>0.2.1</Version>
     <Authors>WWSrapport</Authors>
     <Company>WWSrapport</Company>
     <Product>WWSrapport .NET client</Product>

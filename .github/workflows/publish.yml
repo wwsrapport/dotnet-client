@@ -1,0 +1,27 @@
+name: Publish to NuGet
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: nuget
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - run: dotnet run --project tests/Wwsrapport.Client.Tests/Wwsrapport.Client.Tests.csproj
+      - run: dotnet pack src/Wwsrapport.Client/Wwsrapport.Client.csproj --configuration Release --output artifacts
+      - name: Exchange OIDC token for temporary NuGet API key
+        id: login
+        uses: NuGet/login@v1
+        with:
+          user: ${{ vars.NUGET_USER }}
+      - run: dotnet nuget push 'artifacts/*.nupkg' --api-key '${{ steps.login.outputs.NUGET_API_KEY }}' --source https://api.nuget.org/v3/index.json --skip-duplicate
+

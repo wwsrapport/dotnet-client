@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.2.1] - 2026-08-06
+
+### Added
+
+- Added a manually triggered Trusted Publishing workflow using GitHub OIDC.\n- Added automated release metadata and validation for the 0.2.1 release.
+
 ## [0.2.0] - 2026-08-06
 
 ### Added
@@ -19,4 +25,3 @@ All notable changes to this project are documented in this file.
 ## [0.1.0] - 2026-07-25
 
 - Initial public client release.
-
