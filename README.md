@@ -7,8 +7,8 @@ Official .NET SDK for the WWSrapport API.
 ## Official Links
 
 - API overview and Swagger: [wwsrapport.nl/api/docs](https://wwsrapport.nl/api/docs)
-- OpenAPI JSON: [wwsrapport.nl/api/openapi.json](https://wwsrapport.nl/api/openapi.json)
-- Request a partner account: [wwsrapport.nl/api/toegang-aanvragen](https://wwsrapport.nl/api/toegang-aanvragen)
+- OpenAPI JSON: [wwsrapport.nl/v1/openapi.json](https://wwsrapport.nl/v1/openapi.json)
+- Create an organization account: [wwsrapport.nl/organisatie-account-aanmaken](https://wwsrapport.nl/organisatie-account-aanmaken)
 - WWSrapport account and API keys: [wwsrapport.nl/account](https://wwsrapport.nl/account)
 - GitHub organization: [github.com/wwsrapport](https://github.com/wwsrapport)
 
@@ -54,6 +54,30 @@ var report = await client.Reports.CreateAsync(
 
 Console.WriteLine(report.Data?.Id);
 ```
+
+## OAuth and public-sector context
+
+```csharp
+using var client = new WwsrapportClient(
+    new OAuthClientCredentialsOptions(
+        Environment.GetEnvironmentVariable("WWSRAPPORT_CLIENT_ID")!,
+        Environment.GetEnvironmentVariable("WWSRAPPORT_CLIENT_SECRET")!,
+        new[] { "reports:read", "reports:write" }
+    ),
+    requestContext: new PublicSectorRequestContext(
+        MunicipalityCode: "GM0345",
+        PurposeCode: "huurprijs-toezicht",
+        CaseReference: "ZAAK-2026-001",
+        ClientReference: "zaaksysteem"
+    )
+);
+
+var batch = await client.Batches.CreateAsync(batchInput, "portfolio-2026-08");
+await client.Reports.SubmitHumanReviewAsync("rpt_...", review, "review-zaak-2026-001");
+var exportJob = await client.TenantLifecycle.RequestExportAsync("tenant-export-2026-08");
+```
+
+OAuth tokens are cached until shortly before expiry. Existing API-key construction remains supported. Offboarding is exposed as a controlled request and never silently deletes a dossier.
 
 ## Supported API resources
 

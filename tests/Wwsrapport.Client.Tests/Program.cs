@@ -5,6 +5,7 @@ using Wwsrapport.Webhooks;
 
 await RunsCreateReportWithIdempotencyKey();
 await MapsApiErrors();
+await UsesOAuthContextAndPublicSectorResources();
 VerifiesWebhookSignatures();
 
 Console.WriteLine("All tests passed.");
@@ -18,7 +19,7 @@ static async Task RunsCreateReportWithIdempotencyKey()
         AssertEqual("Bearer", request.Headers.Authorization?.Scheme, "auth scheme");
         AssertEqual("test-key", request.Headers.Authorization?.Parameter, "auth token");
         AssertEqual("idem-1", request.Headers.GetValues("Idempotency-Key").Single(), "idempotency key");
-        AssertEqual("wwsrapport-dotnet/0.2.1", request.Headers.GetValues("X-WWSrapport-Client").Single(), "client header");
+        AssertEqual("wwsrapport-dotnet/0.3.0", request.Headers.GetValues("X-WWSrapport-Client").Single(), "client header");
 
         return Json(HttpStatusCode.OK, "{\"data\":{\"id\":\"rpt_123\",\"status\":\"draft\",\"address\":{\"postcode\":\"3905RB\",\"house_number\":\"4\"}}}");
     });
@@ -38,6 +39,31 @@ static async Task RunsCreateReportWithIdempotencyKey()
 
     AssertEqual("rpt_123", response?.Data?.Id, "report id");
     AssertEqual("draft", response?.Data?.Status, "report status");
+}
+
+static async Task UsesOAuthContextAndPublicSectorResources()
+{
+    var calls = new List<HttpRequestMessage>();
+    var handler = new FakeHandler(request =>
+    {
+        calls.Add(request);
+        if (request.RequestUri?.AbsolutePath == "/oauth/token")
+            return Json(HttpStatusCode.OK, "{\"access_token\":\"oauth-token\",\"expires_in\":300}");
+        return Json(HttpStatusCode.OK, "{\"data\":{\"id\":\"example\"}}");
+    });
+    using var client = new WwsrapportClient(
+        new OAuthClientCredentialsOptions("municipality", "secret", new[] { "reports:read" }),
+        "https://wwsrapport.nl/v1", new HttpClient(handler),
+        new PublicSectorRequestContext("GM0345", "huurprijs-toezicht", "ZAAK-1", "zaaksysteem")
+    );
+    await client.Batches.CreateAsync(new { type = "address_check", externalReference = "batch-1", items = Array.Empty<object>() }, "batch-key");
+    await client.TenantLifecycle.RequestExportAsync("export-key");
+    AssertEqual(3, calls.Count, "OAuth token is cached");
+    AssertEqual("/oauth/token", calls[0].RequestUri?.AbsolutePath, "token path");
+    AssertEqual("Bearer", calls[1].Headers.Authorization?.Scheme, "OAuth bearer scheme");
+    AssertEqual("oauth-token", calls[1].Headers.Authorization?.Parameter, "OAuth bearer token");
+    AssertEqual("GM0345", calls[1].Headers.GetValues("X-WWS-Municipality-Code").Single(), "municipality context");
+    AssertEqual("batch-key", calls[1].Headers.GetValues("Idempotency-Key").Single(), "batch idempotency");
 }
 
 static async Task MapsApiErrors()

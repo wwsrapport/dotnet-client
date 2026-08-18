@@ -2,6 +2,20 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.3.0] - 2026-08-18
+
+### Added
+
+- OAuth 2.0 client credentials with concurrency-safe short-lived token caching.
+- Municipality, purpose, case and client context headers.
+- Batch, human-review, tenant-export and controlled offboarding resources.
+- API version, request ID and correlation ID headers.
+
+### Changed
+
+- The existing API-key constructor remains backwards compatible.
+- NLGov `400 invalid_input` maps to `WwsrapportValidationException` alongside HTTP 422.
+
 ## [0.2.1] - 2026-08-06
 
 ### Added
